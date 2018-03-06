@@ -1,0 +1,19 @@
+{
+  "name": "simple-graphql-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "nodemon --experimental-modules server.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2",
+    "express-graphql": "^0.6.12",
+    "graphql": "^0.13.1",
+    "mongoose": "^5.0.9",
+    "nodemon": "^1.17.1"
+  }
+}
