@@ -12,17 +12,17 @@ const customers = [
 // Customer Type
 const CustomerType = new GraphQLObjectType({
   name: 'Customer',
-  fields: {
+  fields: () => ({
     id: { type: GraphQLString },
     name: { type: GraphQLString },
     email: { type: GraphQLString },
     age: { type: GraphQLInt }
-  }
+  })
 })
 
-const RootQuery = new GraphQLObjectType({
+const query = new GraphQLObjectType({
   name: 'RootQueryType',
-  fields: {
+  fields: () => ({
     customer: {
       type: CustomerType,
       args: {
@@ -38,13 +38,13 @@ const RootQuery = new GraphQLObjectType({
         return customers
       }
     }
-  }
+  })
 })
 
 // Mutations
 const mutation = new GraphQLObjectType({
   name: 'Mutation',
-  fields: {
+  fields: () => ({
     addCustomer: {
       type: CustomerType,
       args: {
@@ -56,10 +56,7 @@ const mutation = new GraphQLObjectType({
         console.log(customers.push({ name, email, age }))
       }
     }
-  }
+  })
 })
 
-module.exports = new GraphQLSchema({
-  query: RootQuery,
-  mutation
-})
+module.exports = new GraphQLSchema({ query, mutation })
