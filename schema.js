@@ -1,41 +1,53 @@
+const fetch = require('node-fetch')
 const { GraphQLList, GraphQLNonNull, GraphQLInt, GraphQLObjectType, GraphQLSchema, GraphQLString } = require('graphql')
 
-const customers = [
-  { id: '1', name: 'John Doe 1', email: 'john1@doe.com', age: 1 },
-  { id: '2', name: 'John Doe 2', email: 'john2@doe.com', age: 2 },
-  { id: '3', name: 'John Doe 3', email: 'john3@doe.com', age: 3 },
-  { id: '4', name: 'John Doe 4', email: 'john4@doe.com', age: 4 },
-  { id: '5', name: 'John Doe 5', email: 'john5@doe.com', age: 5 },
-  { id: '6', name: 'John Doe 6', email: 'john6@doe.com', age: 6 }
-]
+const BASE_URL = 'https://jsonplaceholder.typicode.com'
 
-// Customer Type
-const CustomerType = new GraphQLObjectType({
-  name: 'Customer',
+const PostType = new GraphQLObjectType({
+  name: 'Post',
+  fields: () => ({
+    id: { type: GraphQLString },
+    title: { type: GraphQLString },
+    body: { type: GraphQLString }
+  })
+})
+
+// User Type
+const UserType = new GraphQLObjectType({
+  name: 'User',
   fields: () => ({
     id: { type: GraphQLString },
     name: { type: GraphQLString },
     email: { type: GraphQLString },
-    age: { type: GraphQLInt }
+    posts: {
+      type: new GraphQLList(PostType),
+      args: {
+        limit: { type: GraphQLInt }
+      },
+      resolve ({ id }, { limit }) {
+        const url = `${BASE_URL}/users/${id}/posts`
+        return fetch(url)
+          .then(result => result.json())
+          .then(result => result.slice(0, limit))
+      }
+    }
   })
 })
 
 const query = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: () => ({
-    customer: {
-      type: CustomerType,
-      args: {
-        id: { type: GraphQLString }
-      },
-      resolve (parentValue, args) {
-        return customers.filter(x => x.id === args.id)[0]
+    user: {
+      type: UserType,
+      args: { id: { type: GraphQLString } },
+      resolve (parentValue, { id }) {
+        return fetch(`${BASE_URL}/users/${id}`).then(result => result.json())
       }
     },
-    customers: {
-      type: new GraphQLList(CustomerType),
+    users: {
+      type: new GraphQLList(UserType),
       resolve () {
-        return customers
+        return fetch(`${BASE_URL}/users`).then(result => result.json())
       }
     }
   })
@@ -45,15 +57,17 @@ const query = new GraphQLObjectType({
 const mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
-    addCustomer: {
-      type: CustomerType,
+    addUser: {
+      type: UserType,
       args: {
         name: { type: new GraphQLNonNull(GraphQLString) },
         email: { type: new GraphQLNonNull(GraphQLString) },
-        age: { type: new GraphQLNonNull(GraphQLInt) }
+        username: { type: new GraphQLNonNull(GraphQLString) }
       },
-      resolve (parentValue, { name, email, age }) {
-        console.log(customers.push({ name, email, age }))
+      resolve (parentValue, body) {
+        return fetch(`${BASE_URL}/users`, { method: 'POST', body })
+          .then(res => res.json())
+          .then(json => json)
       }
     }
   })
