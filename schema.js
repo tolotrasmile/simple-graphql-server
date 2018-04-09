@@ -34,6 +34,7 @@ const UserType = new GraphQLObjectType({
   })
 })
 
+// Query
 const query = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: () => ({
